@@ -1,0 +1,6 @@
+{
+  "name": "AuraPages - Digital Scrapbook & Journal",
+  "description": "A responsive personal digital scrapbook and journal with decorative stickers, sticky notes, lined paper canvas, and animated scrapbook tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
