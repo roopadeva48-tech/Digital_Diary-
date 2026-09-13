@@ -128,10 +128,10 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   const handleAddElement = (newElem: Partial<CanvasElement>) => {
     const id = `el-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     
-    // Default position centered in viewport or staggered below the spacious header
+    // Default position centered in viewport or staggered below the compact header
     const canvasBounds = canvasRef.current?.getBoundingClientRect();
     const defaultX = canvasBounds ? Math.max(20, Math.min(260, canvasBounds.width / 2 - (newElem.width || 200) / 2)) : 100;
-    const defaultY = Math.min(650, 160 + (currentPage.elements.length % 5) * 60);
+    const defaultY = Math.min(650, 70 + (currentPage.elements.length % 5) * 45);
 
     const fullElement: CanvasElement = {
       id,
@@ -440,8 +440,8 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
       id="journal-editor-container"
       className="min-h-screen bg-[#F5EFE6] flex flex-col select-none relative overflow-hidden"
     >
-      {/* Top Application Bar with generous free space matching Image 5 */}
-      <header className="h-16 sm:h-18 bg-[#FBF7F0] border-b border-[#EEDBCA] px-3 sm:px-6 lg:px-8 flex items-center justify-between shrink-0 z-30 shadow-2xs">
+      {/* Top Application Bar */}
+      <header className="h-12 sm:h-13 bg-[#FBF7F0] border-b border-[#EEDBCA] px-3 sm:px-5 flex items-center justify-between shrink-0 z-30 shadow-2xs">
         {/* Left: Back, Title & Quick Design Triggers */}
         <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
           <button
@@ -626,9 +626,9 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
           onAddElement={handleAddElement}
         />
 
-        {/* Center Canvas Scrollable Container with free space around notebook */}
+        {/* Center Canvas Scrollable Container */}
         <div
-          className="flex-1 overflow-auto p-4 sm:p-10 pt-6 sm:pt-10 flex items-start justify-center pb-28 sm:pb-16"
+          className="flex-1 overflow-auto p-2 sm:p-5 pt-2 sm:pt-3 flex items-start justify-center pb-20 sm:pb-10"
           onClick={() => setSelectedElementId(null)}
         >
           {/* Responsive Fixed-Artboard Bounding Box */}
@@ -640,7 +640,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
             }}
             className="relative shrink-0 select-none shadow-xl rounded-2xl transition-all duration-150"
           >
-            {/* Scrapbook Journal Page Canvas (Strict 660px coordinate canvas with generous free space in header) */}
+            {/* Scrapbook Journal Page Canvas */}
             <div
               ref={canvasRef}
               id="scrapbook-page-canvas"
@@ -651,7 +651,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
                 transformOrigin: 'top left',
                 backgroundColor: currentPage.customBackgroundColor || undefined,
               }}
-              className={`rounded-2xl shadow-2xl shadow-[#583921]/15 border border-[#E5D7C6] px-8 sm:px-10 pt-10 pb-12 relative transition-colors duration-300 ${getPaperClass(
+              className={`rounded-2xl shadow-2xl shadow-[#583921]/15 border border-[#E5D7C6] px-6 sm:px-8 pt-3 pb-8 relative transition-colors duration-300 ${getPaperClass(
                 currentPage.paperTheme
               )}`}
             >
@@ -666,20 +666,20 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
                 />
               )}
 
-              {/* Top Spiral / Ring binder imitation with free space */}
-              <div className="absolute top-3 inset-x-12 flex justify-between pointer-events-none opacity-30 z-10">
+              {/* Top Spiral / Ring binder imitation */}
+              <div className="absolute top-1.5 inset-x-12 flex justify-between pointer-events-none opacity-25 z-10">
                 {[...Array(10)].map((_, i) => (
                   <div
                     key={i}
-                    className="w-3.5 h-3.5 rounded-full bg-[#8A6D56] border border-black/20 shadow-inner"
+                    className="w-2.5 h-2.5 rounded-full bg-[#8A6D56] border border-black/20 shadow-inner"
                   />
                 ))}
               </div>
 
-              {/* TOP HEADER WITH GENEROUS FREE SPACE */}
-              <div className="relative z-10 pt-4 pb-5 mb-8 border-b-2 border-dashed border-[#DFD1BF]/80 select-none space-y-3">
-                {/* Months Row (Image 5 style with generous breathing room) */}
-                <div className="flex items-center justify-between text-xs font-serif font-bold text-[#8C7058] tracking-wider px-2.5 py-1.5 bg-[#FAF3E8]/80 rounded-xl border border-[#E9DECF]">
+              {/* COMPACT PAGE HEADER */}
+              <div className="relative z-10 pt-1 pb-2 mb-3 border-b border-dashed border-[#DFD1BF]/80 select-none space-y-1.5">
+                {/* Months Row */}
+                <div className="flex items-center justify-between text-[11px] font-serif font-bold text-[#8C7058] tracking-wider px-2 py-0.5 bg-[#FAF3E8]/80 rounded-lg border border-[#E9DECF]">
                   {MONTHS_LIST.map((m) => {
                     const isCurrentMonth = currentPage.month === m;
                     return (
@@ -687,9 +687,9 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
                         key={m}
                         type="button"
                         onClick={() => handleSelectMonth(m)}
-                        className={`px-1.5 py-0.5 rounded-md transition cursor-pointer ${
+                        className={`px-1 py-0.2 rounded transition cursor-pointer text-[10.5px] ${
                           isCurrentMonth
-                            ? 'bg-[#8C4E26] text-white shadow-xs font-black scale-105'
+                            ? 'bg-[#8C4E26] text-white shadow-xs font-black'
                             : 'hover:text-[#3B291D] hover:bg-black/5'
                         }`}
                       >
@@ -699,8 +699,8 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
                   })}
                 </div>
 
-                {/* Days Numbers Row (1 to 31) with generous spacing */}
-                <div className="flex items-center justify-between text-[10px] font-mono text-[#A89078] px-1 py-1 overflow-x-auto no-scrollbar gap-1">
+                {/* Days Numbers Row (1 to 31) */}
+                <div className="flex items-center justify-between text-[9px] font-mono text-[#A89078] px-0.5 py-0.5 overflow-x-auto no-scrollbar gap-0.5">
                   {[...Array(31)].map((_, idx) => {
                     const dayNum = idx + 1;
                     const isCurrentDay = currentPage.day === dayNum;
@@ -712,9 +712,9 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
                         key={dayNum}
                         type="button"
                         onClick={() => handleSelectDay(dayNum)}
-                        className={`w-4.5 h-4.5 rounded-full flex flex-col items-center justify-center transition shrink-0 cursor-pointer relative ${
+                        className={`w-3.5 h-3.5 rounded-full flex flex-col items-center justify-center text-[8.5px] transition shrink-0 cursor-pointer relative ${
                           isCurrentDay
-                            ? 'bg-[#B57C48] text-white font-bold ring-1 ring-[#8C4E26] scale-110 shadow-xs'
+                            ? 'bg-[#B57C48] text-white font-bold ring-1 ring-[#8C4E26] shadow-xs'
                             : 'hover:text-[#3B291D] hover:bg-black/5'
                         }`}
                       >
@@ -727,10 +727,10 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
                   })}
                 </div>
 
-                {/* Aesthetic Free Space Header Bar */}
-                <div className="flex items-center justify-between pt-1 px-1 text-xs text-[#7A5A43]">
+                {/* Date & Title Bar */}
+                <div className="flex items-center justify-between px-0.5 text-xs text-[#7A5A43]">
                   <div className="flex items-center gap-2">
-                    <span className="font-serif font-bold tracking-wide text-[#4A3222]">
+                    <span className="font-serif font-bold tracking-wide text-[#4A3222] text-xs">
                       ✦ {currentPage.month} {currentPage.day} • {currentPage.dayOfWeek || 'Today'}
                     </span>
                   </div>
@@ -754,7 +754,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
               </div>
 
               {/* Canvas Elements Area */}
-              <div className="relative w-full h-[880px] z-10">
+              <div className="relative w-full h-[940px] z-10">
                 {currentPage.elements.map((element) => (
                   <CanvasElementRenderer
                     key={element.id}

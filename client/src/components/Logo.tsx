@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface LogoProps {
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   showSlogan?: boolean;
   className?: string;
   onClick?: () => void;
@@ -15,10 +15,11 @@ export const Logo: React.FC<LogoProps> = ({
 }) => {
   // Dimensions mapping
   const dimMap = {
-    sm: { width: 140, height: 110, fontSize: 13, bookScale: 0.65 },
-    md: { width: 220, height: 175, fontSize: 18, bookScale: 1 },
-    lg: { width: 280, height: 220, fontSize: 22, bookScale: 1.25 },
-    xl: { width: 340, height: 260, fontSize: 26, bookScale: 1.5 },
+    xs: { width: 44, height: 35, fontSize: 8, bookScale: 0.35 },
+    sm: { width: 70, height: 56, fontSize: 10, bookScale: 0.5 },
+    md: { width: 140, height: 110, fontSize: 13, bookScale: 0.75 },
+    lg: { width: 220, height: 175, fontSize: 18, bookScale: 1 },
+    xl: { width: 300, height: 240, fontSize: 24, bookScale: 1.4 },
   };
 
   const current = dimMap[size];
