@@ -16,8 +16,17 @@ const STORAGE_KEY_CATEGORIES = 'aurapages_categories_v1';
 const STORAGE_KEY_USER = 'aurapages_user_v1';
 
 export default function App() {
+  // Step 1: Logo Page initially
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('splash');
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    try {
+      const savedUser = localStorage.getItem(STORAGE_KEY_USER);
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [categories, setCategories] = useState<JournalCategory[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_CATEGORIES);
@@ -33,18 +42,6 @@ export default function App() {
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-  // Check if user was already stored
-  useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem(STORAGE_KEY_USER);
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
-      }
-    } catch (e) {
-      console.error('Error loading user profile:', e);
-    }
-  }, []);
-
   // Save categories on change
   useEffect(() => {
     try {
@@ -54,16 +51,12 @@ export default function App() {
     }
   }, [categories]);
 
-  // Handle splash completion
+  // Step 2: When Logo/Splash completes -> ALWAYS move to Authentication Page
   const handleSplashComplete = () => {
-    if (user) {
-      setCurrentScreen('dashboard');
-    } else {
-      setCurrentScreen('auth');
-    }
+    setCurrentScreen('auth');
   };
 
-  // Handle successful login or sign up
+  // Step 3: When Login / Sign Up is complete -> move to Landing Page (Dashboard)
   const handleAuthSuccess = (authenticatedUser: UserProfile) => {
     setUser(authenticatedUser);
     try {
@@ -74,7 +67,7 @@ export default function App() {
     setCurrentScreen('dashboard');
   };
 
-  // Handle logout
+  // Handle logout -> return to Authentication Page
   const handleLogout = () => {
     setUser(null);
     try {
@@ -151,20 +144,20 @@ export default function App() {
   return (
     <div className="w-full min-h-screen bg-[#FAF6EE] text-[#3E2B1F] font-sans antialiased overflow-x-hidden">
       <AnimatePresence mode="wait">
-        {/* 1. Splash Screen */}
+        {/* 1. Logo Page (Splash Screen) initially */}
         {currentScreen === 'splash' && (
           <motion.div
             key="splash-screen"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.4 }}
             className="w-full h-full"
           >
             <SplashScreen onComplete={handleSplashComplete} />
           </motion.div>
         )}
 
-        {/* 2. Authentication Flow (Login & Sign Up) */}
+        {/* 2. Authentication Page (Login & Sign Up with Demos) */}
         {currentScreen === 'auth' && (
           <motion.div
             key="auth-screen"
@@ -174,11 +167,11 @@ export default function App() {
             transition={{ duration: 0.4 }}
             className="w-full h-full"
           >
-            <AuthForm onSuccess={handleAuthSuccess} />
+            <AuthForm initialMode="login" onSuccess={handleAuthSuccess} />
           </motion.div>
         )}
 
-        {/* 3. Dashboard Page */}
+        {/* 3. Landing Page (Dashboard) */}
         {currentScreen === 'dashboard' && user && (
           <motion.div
             key="dashboard-screen"
@@ -200,7 +193,7 @@ export default function App() {
           </motion.div>
         )}
 
-        {/* 4. Journal Page / Editor */}
+        {/* 4. Journal Canvas / Editor */}
         {currentScreen === 'editor' && activeCategory && (
           <motion.div
             key={`editor-${activeCategory.id}`}

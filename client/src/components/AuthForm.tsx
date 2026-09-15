@@ -22,13 +22,18 @@ import { UserProfile } from '../types';
 import { authService } from '../services/authService';
 
 interface AuthFormProps {
+  initialMode?: 'login' | 'signup';
   onSuccess: (user: UserProfile) => void;
 }
 
 const AVATAR_OPTIONS = ['🌸', '🎨', '🌿', '☕', '🦋', '🌙', '🍓', '🧸', '🎀', '✨'];
 
-export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
-  const [isLogin, setIsLogin] = useState<boolean>(true);
+export const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'login', onSuccess }) => {
+  const [isLogin, setIsLogin] = useState<boolean>(initialMode === 'login');
+
+  React.useEffect(() => {
+    setIsLogin(initialMode === 'login');
+  }, [initialMode]);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string | null>(null);

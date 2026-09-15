@@ -9,3 +9,4 @@ export { Logo } from './Logo';
 export { SidebarToolbar } from './SidebarToolbar';
 export { SplashScreen } from './SplashScreen';
 export { StickerLibrary } from './StickerLibrary';
+export { NotFoundPage } from './NotFoundPage';
