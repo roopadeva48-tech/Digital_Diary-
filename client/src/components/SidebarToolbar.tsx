@@ -247,10 +247,7 @@ export const SidebarToolbar: React.FC<SidebarToolbarProps> = ({
           {activeTab === 'image' && (
             <div className="p-4 space-y-4 text-xs text-[#4A3423]">
               <div>
-                <h4 className="font-bold text-sm text-[#453022] mb-1">Polaroid & Photo Frames</h4>
-                <p className="text-[11px] text-[#876E59] font-editorial">
-                  Add personal photos wrapped in realistic vintage polaroid borders with washi tape pins.
-                </p>
+                <h4 className="font-bold text-sm text-[#453022]">Polaroid & Photo Frames</h4>
               </div>
 
               {/* Upload file */}
