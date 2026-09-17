@@ -365,10 +365,7 @@ export const SidebarToolbar: React.FC<SidebarToolbarProps> = ({
           {activeTab === 'text' && (
             <div className="p-4 space-y-4 text-xs text-[#4A3423]">
               <div>
-                <h4 className="font-bold text-sm text-[#453022] mb-1">Quick Note Elements</h4>
-                <p className="text-[11px] text-[#876E59] font-editorial">
-                  Add handwritten memos, diary paragraphs, and scrap notes. Use the Left Sidebar for typography & fonts.
-                </p>
+                <h4 className="font-bold text-sm text-[#453022]">Quick Note Elements</h4>
               </div>
 
               {/* Quick Note Presets */}
