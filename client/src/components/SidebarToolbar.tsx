@@ -422,10 +422,7 @@ export const SidebarToolbar: React.FC<SidebarToolbarProps> = ({
           {activeTab === 'pinned' && (
             <div className="p-4 space-y-4 text-xs text-[#4A3423]">
               <div>
-                <h4 className="font-bold text-sm text-[#453022] mb-1">Pinning & Favorites</h4>
-                <p className="text-[11px] text-[#876E59] font-editorial">
-                  Pin your favorite elements in place or mark this entire scrapbook spread as a favorite.
-                </p>
+                <h4 className="font-bold text-sm text-[#453022]">Pinning & Favorites</h4>
               </div>
 
               {/* Pin Page */}
@@ -483,10 +480,7 @@ export const SidebarToolbar: React.FC<SidebarToolbarProps> = ({
           {activeTab === 'emoji' && (
             <div className="p-4 space-y-4 text-xs text-[#4A3423]">
               <div>
-                <h4 className="font-bold text-sm text-[#453022] mb-1">Scrapbook Emojis</h4>
-                <p className="text-[11px] text-[#876E59] font-editorial">
-                  Click any aesthetic scrapbook emoji to stamp it onto the page.
-                </p>
+                <h4 className="font-bold text-sm text-[#453022]">Scrapbook Emojis</h4>
               </div>
 
               <div className="grid grid-cols-4 gap-2 bg-[#FAF6EE] p-3 rounded-2xl border border-[#E9DFD0]">
@@ -520,10 +514,7 @@ export const SidebarToolbar: React.FC<SidebarToolbarProps> = ({
           {activeTab === 'video' && (
             <div className="p-4 space-y-4 text-xs text-[#4A3423]">
               <div>
-                <h4 className="font-bold text-sm text-[#453022] mb-1">Video Memory Clip</h4>
-                <p className="text-[11px] text-[#876E59] font-editorial">
-                  Embed or upload a short looping memory clip in a vintage player frame.
-                </p>
+                <h4 className="font-bold text-sm text-[#453022]">Video Memory Clip</h4>
               </div>
 
               <div className="space-y-2">
