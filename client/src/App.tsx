@@ -4,59 +4,182 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useParams,
+  useLocation,
+} from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { AppScreen, JournalCategory, UserProfile } from './types';
+import { JournalCategory, UserProfile } from './types';
 import { SplashScreen } from './components/SplashScreen';
 import { AuthForm } from './components/AuthForm';
 import { Dashboard } from './components/Dashboard';
 import { JournalEditor } from './components/JournalEditor';
+import { NotFoundPage } from './components/NotFoundPage';
 import { INITIAL_JOURNAL_CATEGORIES } from './data/defaultJournals';
 
 const STORAGE_KEY_CATEGORIES = 'aurapages_categories_v1';
 const STORAGE_KEY_USER = 'aurapages_user_v1';
 
-export default function App() {
-  // Step 1: Logo Page initially
-  const [currentScreen, setCurrentScreen] = useState<AppScreen>('splash');
-  const [user, setUser] = useState<UserProfile | null>(() => {
+// 1. Splash Page Screen
+function SplashPageWrapper() {
+  const navigate = useNavigate();
+
+  const handleSplashComplete = () => {
     try {
       const savedUser = localStorage.getItem(STORAGE_KEY_USER);
-      return savedUser ? JSON.parse(savedUser) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  const [categories, setCategories] = useState<JournalCategory[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY_CATEGORIES);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (savedUser && JSON.parse(savedUser)) {
+        navigate('/dashboard', { replace: true });
+        return;
       }
-    } catch (e) {
-      console.error('Error loading saved categories:', e);
+    } catch {
+      // ignore
     }
-    return INITIAL_JOURNAL_CATEGORIES;
-  });
-
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-
-  // Save categories on change
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(categories));
-    } catch (e) {
-      console.error('Error saving categories:', e);
-    }
-  }, [categories]);
-
-  // Step 2: When Logo/Splash completes -> ALWAYS move to Authentication Page
-  const handleSplashComplete = () => {
-    setCurrentScreen('auth');
+    navigate('/auth', { replace: true });
   };
 
-  // Step 3: When Login / Sign Up is complete -> move to Landing Page (Dashboard)
+  return (
+    <motion.div
+      key="splash-screen"
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ duration: 0.4 }}
+      className="w-full h-full"
+    >
+      <SplashScreen onComplete={handleSplashComplete} />
+    </motion.div>
+  );
+}
+
+// 2. Auth Page Screen (Login / Sign Up)
+function AuthPageWrapper({
+  initialMode = 'login',
+  onAuthSuccess,
+}: {
+  initialMode?: 'login' | 'signup';
+  onAuthSuccess: (user: UserProfile) => void;
+}) {
+  const navigate = useNavigate();
+
+  const handleSuccess = (user: UserProfile) => {
+    onAuthSuccess(user);
+    navigate('/dashboard');
+  };
+
+  return (
+    <motion.div
+      key={`auth-screen-${initialMode}`}
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.4 }}
+      className="w-full h-full"
+    >
+      <AuthForm initialMode={initialMode} onSuccess={handleSuccess} />
+    </motion.div>
+  );
+}
+
+// 3. Dashboard Page Screen
+function DashboardPageWrapper({
+  user,
+  categories,
+  onAddCategory,
+  onDeleteCategory,
+  onToggleFavorite,
+  onLogout,
+}: {
+  user: UserProfile | null;
+  categories: JournalCategory[];
+  onAddCategory: (
+    newCategory: Omit<JournalCategory, 'id' | 'createdAt' | 'updatedAt' | 'pages'>
+  ) => void;
+  onDeleteCategory: (categoryId: string) => void;
+  onToggleFavorite: (categoryId: string) => void;
+  onLogout: () => void;
+}) {
+  const navigate = useNavigate();
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return (
+    <motion.div
+      key="dashboard-screen"
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ duration: 0.35 }}
+      className="w-full h-full"
+    >
+      <Dashboard
+        user={user}
+        categories={categories}
+        onSelectCategory={(category) => navigate(`/journal/${category.id}`)}
+        onAddCategory={onAddCategory}
+        onDeleteCategory={onDeleteCategory}
+        onToggleFavorite={onToggleFavorite}
+        onLogout={onLogout}
+      />
+    </motion.div>
+  );
+}
+
+// 4. Journal Canvas / Editor Page Screen
+function JournalEditorPageWrapper({
+  categories,
+  onUpdateCategory,
+}: {
+  categories: JournalCategory[];
+  onUpdateCategory: (updated: JournalCategory) => void;
+}) {
+  const { categoryId } = useParams<{ categoryId: string }>();
+  const navigate = useNavigate();
+
+  const activeCategory =
+    categories.find((c) => c.id === categoryId) || categories[0] || null;
+
+  if (!activeCategory) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return (
+    <motion.div
+      key={`editor-${activeCategory.id}`}
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.35 }}
+      className="w-full h-full"
+    >
+      <JournalEditor
+        category={activeCategory}
+        onBackToDashboard={() => navigate('/dashboard')}
+        onUpdateCategory={onUpdateCategory}
+      />
+    </motion.div>
+  );
+}
+
+function AppRoutes({
+  user,
+  setUser,
+  categories,
+  setCategories,
+}: {
+  user: UserProfile | null;
+  setUser: React.Dispatch<React.SetStateAction<UserProfile | null>>;
+  categories: JournalCategory[];
+  setCategories: React.Dispatch<React.SetStateAction<JournalCategory[]>>;
+}) {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const handleAuthSuccess = (authenticatedUser: UserProfile) => {
     setUser(authenticatedUser);
     try {
@@ -64,10 +187,8 @@ export default function App() {
     } catch (e) {
       console.error('Error persisting user:', e);
     }
-    setCurrentScreen('dashboard');
   };
 
-  // Handle logout -> return to Authentication Page
   const handleLogout = () => {
     setUser(null);
     try {
@@ -75,16 +196,9 @@ export default function App() {
     } catch (e) {
       console.error('Error removing user:', e);
     }
-    setCurrentScreen('auth');
+    navigate('/auth');
   };
 
-  // Select category to edit
-  const handleSelectCategory = (category: JournalCategory) => {
-    setSelectedCategoryId(category.id);
-    setCurrentScreen('editor');
-  };
-
-  // Add new category
   const handleAddCategory = (
     newCategory: Omit<JournalCategory, 'id' | 'createdAt' | 'updatedAt' | 'pages'>
   ) => {
@@ -115,16 +229,10 @@ export default function App() {
     setCategories([category, ...categories]);
   };
 
-  // Delete category
   const handleDeleteCategory = (categoryId: string) => {
     setCategories(categories.filter((c) => c.id !== categoryId));
-    if (selectedCategoryId === categoryId) {
-      setSelectedCategoryId(null);
-      setCurrentScreen('dashboard');
-    }
   };
 
-  // Toggle favorite on category
   const handleToggleFavorite = (categoryId: string) => {
     setCategories(
       categories.map((cat) =>
@@ -133,84 +241,130 @@ export default function App() {
     );
   };
 
-  // Update category (pages, title, elements)
   const handleUpdateCategory = (updated: JournalCategory) => {
     setCategories(categories.map((c) => (c.id === updated.id ? updated : c)));
   };
 
-  const activeCategory =
-    categories.find((c) => c.id === selectedCategoryId) || categories[0] || null;
-
   return (
-    <div className="w-full min-h-screen bg-[#FAF6EE] text-[#3E2B1F] font-sans antialiased overflow-x-hidden">
-      <AnimatePresence mode="wait">
-        {/* 1. Logo Page (Splash Screen) initially */}
-        {currentScreen === 'splash' && (
-          <motion.div
-            key="splash-screen"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.4 }}
-            className="w-full h-full"
-          >
-            <SplashScreen onComplete={handleSplashComplete} />
-          </motion.div>
-        )}
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        {/* Splash page */}
+        <Route path="/" element={<SplashPageWrapper />} />
+        <Route path="/splash" element={<SplashPageWrapper />} />
 
-        {/* 2. Authentication Page (Login & Sign Up with Demos) */}
-        {currentScreen === 'auth' && (
-          <motion.div
-            key="auth-screen"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.4 }}
-            className="w-full h-full"
-          >
-            <AuthForm initialMode="login" onSuccess={handleAuthSuccess} />
-          </motion.div>
-        )}
+        {/* Authentication pages */}
+        <Route
+          path="/auth"
+          element={
+            <AuthPageWrapper
+              initialMode="login"
+              onAuthSuccess={handleAuthSuccess}
+            />
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <AuthPageWrapper
+              initialMode="login"
+              onAuthSuccess={handleAuthSuccess}
+            />
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <AuthPageWrapper
+              initialMode="signup"
+              onAuthSuccess={handleAuthSuccess}
+            />
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <AuthPageWrapper
+              initialMode="signup"
+              onAuthSuccess={handleAuthSuccess}
+            />
+          }
+        />
 
-        {/* 3. Landing Page (Dashboard) */}
-        {currentScreen === 'dashboard' && user && (
-          <motion.div
-            key="dashboard-screen"
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.35 }}
-            className="w-full h-full"
-          >
-            <Dashboard
+        {/* Dashboard Landing Page */}
+        <Route
+          path="/dashboard"
+          element={
+            <DashboardPageWrapper
               user={user}
               categories={categories}
-              onSelectCategory={handleSelectCategory}
               onAddCategory={handleAddCategory}
               onDeleteCategory={handleDeleteCategory}
               onToggleFavorite={handleToggleFavorite}
               onLogout={handleLogout}
             />
-          </motion.div>
-        )}
+          }
+        />
 
-        {/* 4. Journal Canvas / Editor */}
-        {currentScreen === 'editor' && activeCategory && (
-          <motion.div
-            key={`editor-${activeCategory.id}`}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.35 }}
-            className="w-full h-full"
-          >
-            <JournalEditor
-              category={activeCategory}
-              onBackToDashboard={() => setCurrentScreen('dashboard')}
+        {/* Journal Editor Page */}
+        <Route
+          path="/journal/:categoryId"
+          element={
+            <JournalEditorPageWrapper
+              categories={categories}
               onUpdateCategory={handleUpdateCategory}
             />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+          }
+        />
+
+        {/* 404 Fallback */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
+
+export default function App() {
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    try {
+      const savedUser = localStorage.getItem(STORAGE_KEY_USER);
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [categories, setCategories] = useState<JournalCategory[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_CATEGORIES);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error('Error loading saved categories:', e);
+    }
+    return INITIAL_JOURNAL_CATEGORIES;
+  });
+
+  // Save categories on change
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(categories));
+    } catch (e) {
+      console.error('Error saving categories:', e);
+    }
+  }, [categories]);
+
+  return (
+    <BrowserRouter>
+      <div className="w-full min-h-screen bg-[#FAF6EE] text-[#3E2B1F] font-sans antialiased overflow-x-hidden">
+        <AppRoutes
+          user={user}
+          setUser={setUser}
+          categories={categories}
+          setCategories={setCategories}
+        />
+      </div>
+    </BrowserRouter>
   );
 }

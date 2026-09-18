@@ -261,9 +261,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'login', onSuc
         className="w-full max-w-lg relative z-10"
       >
         {/* Decorative Scrapbook washi tape header */}
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-44 h-7 bg-[#E2C3A7]/90 rotate-[-1.5deg] rounded-sm shadow-sm flex items-center justify-center border-t border-b border-[#D4AE8D]/70 pointer-events-none z-20">
-          <span className="text-[10px] tracking-widest text-[#734A2D] font-serif uppercase font-semibold flex items-center gap-1.5">
-            <Sparkles className="w-2.5 h-2.5" />
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 h-7 bg-[#E2C3A7]/90 rotate-[-1.5deg] rounded-sm shadow-sm flex items-center justify-center border-t border-b border-[#D4AE8D]/70 pointer-events-none z-20 whitespace-nowrap">
+          <span className="text-[10px] tracking-widest text-[#734A2D] font-serif uppercase font-semibold flex items-center gap-1.5 whitespace-nowrap">
+            <Sparkles className="w-2.5 h-2.5 shrink-0" />
             {isLogin ? 'WELCOME BACK • LOG IN' : 'NEW ADVENTURE • SIGN UP'}
           </span>
         </div>
