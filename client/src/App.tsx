@@ -25,6 +25,17 @@ import { INITIAL_JOURNAL_CATEGORIES } from './data/defaultJournals';
 const STORAGE_KEY_CATEGORIES = 'aurapages_categories_v1';
 const STORAGE_KEY_USER = 'aurapages_user_v1';
 
+// Scroll to top automatically on route changes
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  }, [pathname]);
+  return null;
+}
+
 // 1. Splash Page Screen
 function SplashPageWrapper() {
   const navigate = useNavigate();
@@ -375,6 +386,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <div className="w-full min-h-screen bg-[#FAF6EE] text-[#3E2B1F] font-sans antialiased overflow-x-hidden">
         <AppRoutes
           user={user}

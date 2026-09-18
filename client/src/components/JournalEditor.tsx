@@ -94,8 +94,20 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   const fitScale = Math.min(1, Math.max(0.42, availableCanvasWidth / 660));
   const effectiveScale = isMobile && isFitMode ? fitScale * zoomScale : zoomScale;
 
-  // Canvas DOM ref
+  // Canvas DOM and Scroll Container refs
   const canvasRef = useRef<HTMLDivElement>(null);
+  const canvasScrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Automatically reset scroll position to top whenever opening notes or switching pages
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    if (canvasScrollContainerRef.current) {
+      canvasScrollContainerRef.current.scrollTop = 0;
+      canvasScrollContainerRef.current.scrollLeft = 0;
+    }
+  }, [category.id, activePageIndex]);
 
   // Save feedback indicator
   const [, setIsSaved] = useState<boolean>(true);
@@ -443,7 +455,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   return (
     <div
       id="journal-editor-container"
-      className="min-h-screen bg-[#F5EFE6] flex flex-col select-none relative overflow-hidden"
+      className="h-screen w-full bg-[#F5EFE6] flex flex-col select-none relative overflow-hidden fixed inset-0 z-40"
     >
       {/* Top Application Bar */}
       <header className="h-12 sm:h-13 bg-[#FBF7F0] border-b border-[#EEDBCA] px-3 sm:px-5 flex items-center justify-between shrink-0 z-30 shadow-2xs">
@@ -639,6 +651,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
 
         {/* Center Canvas Scrollable Container */}
         <div
+          ref={canvasScrollContainerRef}
           className="flex-1 overflow-auto p-2 sm:p-5 pt-2 sm:pt-3 flex items-start justify-center pb-20 sm:pb-10"
           onClick={() => setSelectedElementId(null)}
         >
