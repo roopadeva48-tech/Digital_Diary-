@@ -43,33 +43,6 @@ const PRESET_EMOJIS = [
   '📷', '🍰', '🍁', '💎', '🕊️', '🌅', '🌼', '🐾'
 ];
 
-const PRESET_COVERS = [
-  {
-    name: 'Cozy Morning',
-    url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&auto=format&fit=crop&q=80',
-  },
-  {
-    name: 'Sakura & Spring',
-    url: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=600&auto=format&fit=crop&q=80',
-  },
-  {
-    name: 'Vintage Books',
-    url: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=600&auto=format&fit=crop&q=80',
-  },
-  {
-    name: 'Golden Sunset',
-    url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80',
-  },
-  {
-    name: 'Botanical Garden',
-    url: 'https://images.unsplash.com/photo-1463936575829-25148e1db1b8?w=600&auto=format&fit=crop&q=80',
-  },
-  {
-    name: 'Coffee & Journal',
-    url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop&q=80',
-  },
-];
-
 export const EditJournalModal: React.FC<EditJournalModalProps> = ({
   isOpen,
   onClose,
@@ -340,36 +313,6 @@ export const EditJournalModal: React.FC<EditJournalModalProps> = ({
                       >
                         Apply
                       </button>
-                    </div>
-                  </div>
-
-                  {/* Preset Aesthetic Covers */}
-                  <div>
-                    <label className="text-[11px] font-semibold text-[#8C6D53] uppercase tracking-wider block mb-2">
-                      Or choose an aesthetic preset:
-                    </label>
-                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                      {PRESET_COVERS.map((preset) => (
-                        <button
-                          key={preset.name}
-                          type="button"
-                          onClick={() => setCoverImage(preset.url)}
-                          className={`relative h-16 rounded-lg overflow-hidden border transition group ${
-                            coverImage === preset.url
-                              ? 'ring-2 ring-[#9E5728] border-transparent scale-102 shadow-sm'
-                              : 'border-[#E4D5C4] hover:border-[#9E5728]'
-                          }`}
-                        >
-                          <img
-                            src={preset.url}
-                            alt={preset.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          />
-                          <span className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[9px] py-0.5 px-1 truncate text-center">
-                            {preset.name}
-                          </span>
-                        </button>
-                      ))}
                     </div>
                   </div>
                 </div>
