@@ -105,14 +105,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
       className="min-h-screen bg-[#FAF6EE] flex flex-col text-[#3D2E21]"
     >
       {/* Top Navigation Header */}
-      <header className="sticky top-0 z-30 h-12 sm:h-13 bg-[#FAF6EE]/95 backdrop-blur-md border-b border-[#E8DEC8] px-4 sm:px-8 py-1.5 flex items-center justify-between shadow-2xs">
-        <div className="flex items-center gap-2.5">
+      <header className="sticky top-0 z-30 h-14 sm:h-16 bg-[#FAF6EE]/95 backdrop-blur-md border-b border-[#E8DEC8] px-4 sm:px-8 py-2 sm:py-3 flex items-center justify-between shadow-2xs">
+        <div className="flex items-center gap-3">
           <Logo size="xs" showSlogan={false} className="shrink-0" />
-          <div className="hidden sm:block">
-            <h1 className="text-sm font-serif-display font-bold text-[#453022] leading-none">
+          <div className="hidden sm:flex flex-col justify-center">
+            <h1 className="text-base sm:text-lg font-serif-display font-bold text-[#453022] leading-tight tracking-tight">
               AuraPages
             </h1>
-            <p className="text-[10px] text-[#8C6D53] tracking-wide font-editorial">
+            <p className="text-[11px] sm:text-xs text-[#8C6D53] tracking-wider font-editorial mt-1 leading-tight">
               Personal Digital Scrapbook
             </p>
           </div>
