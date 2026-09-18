@@ -8,6 +8,7 @@ import {
 import { CanvasElementRenderer } from './CanvasElementRenderer';
 import { SidebarToolbar } from './SidebarToolbar';
 import { LeftSidebar, LeftSidebarTab } from './LeftSidebar';
+import { EditJournalModal } from './EditJournalModal';
 import { 
   ArrowLeft, 
   Plus, 
@@ -21,7 +22,8 @@ import {
   Palette,
   Type,
   Highlighter,
-  Sliders
+  Sliders,
+  Edit3
 } from 'lucide-react';
 
 interface JournalEditorProps {
@@ -65,6 +67,9 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState<boolean>(() =>
     typeof window !== 'undefined' ? window.innerWidth >= 1024 : false
   );
+
+  // Customize notes details and cover modal state
+  const [isEditDetailsOpen, setIsEditDetailsOpen] = useState<boolean>(false);
 
   // Zoom scale state
   const [zoomScale, setZoomScale] = useState<number>(1);
@@ -453,13 +458,19 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
             <ArrowLeft className="w-4 h-4" />
           </button>
 
-          {/* Collection Title & Emoji Badge */}
-          <div className="flex items-center gap-2 min-w-0 bg-[#FAF5ED] px-3 py-1.5 rounded-full border border-[#E5D8C7]">
-            <span className="text-lg shrink-0">{category.coverEmoji}</span>
-            <h2 className="font-serif-display font-bold text-xs sm:text-sm text-[#3E2B1F] truncate max-w-[110px] sm:max-w-xs">
+          {/* Collection Title & Emoji Badge (Clickable to customize notes & cover) */}
+          <button
+            type="button"
+            onClick={() => setIsEditDetailsOpen(true)}
+            className="flex items-center gap-2 min-w-0 bg-[#FAF5ED] hover:bg-[#F2E5D4] px-3 py-1.5 rounded-full border border-[#E5D8C7] hover:border-[#D8C7B5] transition cursor-pointer shadow-2xs group"
+            title="Click to customize notes cover photo, heading name, color theme & emoji"
+          >
+            <span className="text-lg shrink-0 group-hover:scale-110 transition-transform">{category.coverEmoji}</span>
+            <h2 className="font-serif-display font-bold text-xs sm:text-sm text-[#3E2B1F] group-hover:text-[#8C4E26] truncate max-w-[110px] sm:max-w-xs transition-colors">
               {category.title}
             </h2>
-          </div>
+            <Edit3 className="w-3 h-3 text-[#A38A75] group-hover:text-[#8C4E26] shrink-0 opacity-70 group-hover:opacity-100 transition" />
+          </button>
 
           <div className="h-5 w-[1px] bg-[#DBCBB9] hidden lg:block shrink-0" />
 
@@ -883,6 +894,19 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Customize notes & cover photo modal */}
+      <EditJournalModal
+        isOpen={isEditDetailsOpen}
+        onClose={() => setIsEditDetailsOpen(false)}
+        category={category}
+        onSave={(updated) => {
+          onUpdateCategory({
+            ...category,
+            ...updated,
+          });
+        }}
+      />
     </div>
   );
 };

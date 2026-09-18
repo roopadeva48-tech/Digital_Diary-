@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { JournalCategory, UserProfile } from '../types';
 import { JournalCard } from './JournalCard';
+import { EditJournalModal } from './EditJournalModal';
 import { Logo } from './Logo';
 import { 
   Plus, 
@@ -14,7 +15,8 @@ import {
   Layers, 
   Heart,
   X,
-  Smile
+  Smile,
+  Upload
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -24,6 +26,7 @@ interface DashboardProps {
   onAddCategory: (category: Omit<JournalCategory, 'id' | 'createdAt' | 'updatedAt' | 'pages'>) => void;
   onDeleteCategory: (categoryId: string) => void;
   onToggleFavorite: (categoryId: string) => void;
+  onUpdateCategory?: (updated: JournalCategory) => void;
   onLogout: () => void;
 }
 
@@ -47,11 +50,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onAddCategory,
   onDeleteCategory,
   onToggleFavorite,
+  onUpdateCategory,
   onLogout,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<'all' | 'favorites'>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<JournalCategory | null>(null);
 
   // New Category form state
   const [newTitle, setNewTitle] = useState('');
@@ -245,6 +250,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 category={category}
                 index={index}
                 onSelect={onSelectCategory}
+                onEdit={(cat, e) => {
+                  e.stopPropagation();
+                  setEditingCategory(cat);
+                }}
                 onToggleFavorite={(id, e) => {
                   e.stopPropagation();
                   onToggleFavorite(id);
@@ -418,6 +427,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         )}
       </AnimatePresence>
+
+      {/* Edit Category Modal */}
+      {editingCategory && (
+        <EditJournalModal
+          isOpen={!!editingCategory}
+          onClose={() => setEditingCategory(null)}
+          category={editingCategory}
+          onSave={(updated) => {
+            if (onUpdateCategory) {
+              onUpdateCategory({
+                ...editingCategory,
+                ...updated,
+              });
+            }
+          }}
+        />
+      )}
     </motion.div>
   );
 };

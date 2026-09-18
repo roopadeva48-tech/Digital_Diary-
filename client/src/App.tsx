@@ -91,6 +91,7 @@ function DashboardPageWrapper({
   onAddCategory,
   onDeleteCategory,
   onToggleFavorite,
+  onUpdateCategory,
   onLogout,
 }: {
   user: UserProfile | null;
@@ -100,6 +101,7 @@ function DashboardPageWrapper({
   ) => void;
   onDeleteCategory: (categoryId: string) => void;
   onToggleFavorite: (categoryId: string) => void;
+  onUpdateCategory: (updated: JournalCategory) => void;
   onLogout: () => void;
 }) {
   const navigate = useNavigate();
@@ -124,6 +126,7 @@ function DashboardPageWrapper({
         onAddCategory={onAddCategory}
         onDeleteCategory={onDeleteCategory}
         onToggleFavorite={onToggleFavorite}
+        onUpdateCategory={onUpdateCategory}
         onLogout={onLogout}
       />
     </motion.div>
@@ -300,6 +303,7 @@ function AppRoutes({
               onAddCategory={handleAddCategory}
               onDeleteCategory={handleDeleteCategory}
               onToggleFavorite={handleToggleFavorite}
+              onUpdateCategory={handleUpdateCategory}
               onLogout={handleLogout}
             />
           }
@@ -338,7 +342,21 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_KEY_CATEGORIES);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((cat: JournalCategory) => {
+            if (
+              cat.id === 'cat-memories' &&
+              (!cat.coverImage || cat.coverImage.includes('photo-1540518614846-7ede433c4ef5'))
+            ) {
+              return {
+                ...cat,
+                coverImage:
+                  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&auto=format&fit=crop&q=80',
+              };
+            }
+            return cat;
+          });
+        }
       }
     } catch (e) {
       console.error('Error loading saved categories:', e);

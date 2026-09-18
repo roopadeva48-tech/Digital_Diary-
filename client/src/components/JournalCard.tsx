@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { JournalCategory } from '../types';
-import { BookOpen, Star, MoreVertical, Calendar, Sparkles, Trash2 } from 'lucide-react';
+import { BookOpen, Star, MoreVertical, Calendar, Sparkles, Trash2, Edit3 } from 'lucide-react';
 
 interface JournalCardProps {
   category: JournalCategory;
@@ -9,6 +9,7 @@ interface JournalCardProps {
   onSelect: (category: JournalCategory) => void;
   onToggleFavorite: (categoryId: string, e: React.MouseEvent) => void;
   onDelete: (categoryId: string, e: React.MouseEvent) => void;
+  onEdit?: (category: JournalCategory, e: React.MouseEvent) => void;
 }
 
 export const JournalCard: React.FC<JournalCardProps> = ({
@@ -17,7 +18,10 @@ export const JournalCard: React.FC<JournalCardProps> = ({
   onSelect,
   onToggleFavorite,
   onDelete,
+  onEdit,
 }) => {
+  const [imageError, setImageError] = useState(false);
+
   return (
     <motion.div
       id={`journal-card-${category.id}`}
@@ -41,11 +45,12 @@ export const JournalCard: React.FC<JournalCardProps> = ({
         className="h-36 sm:h-40 w-full relative overflow-hidden flex items-center justify-center p-4"
         style={{ backgroundColor: category.coverColor || '#EBD8C3' }}
       >
-        {category.coverImage ? (
+        {category.coverImage && !imageError ? (
           <>
             <img
               src={category.coverImage}
               alt={category.title}
+              onError={() => setImageError(true)}
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               referrerPolicy="no-referrer"
             />
@@ -57,32 +62,47 @@ export const JournalCard: React.FC<JournalCardProps> = ({
           </div>
         )}
 
-        {/* Favorite Pin Button */}
-        <button
-          type="button"
-          onClick={(e) => onToggleFavorite(category.id, e)}
-          className={`absolute top-3 right-3 z-20 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md transition-all ${
-            category.isFavorite
-              ? 'bg-[#FFECC8] text-[#C47D42] shadow-sm'
-              : 'bg-black/20 text-white/80 hover:bg-black/40 hover:text-white'
-          }`}
-          title={category.isFavorite ? 'Remove from favorites' : 'Pin to favorites'}
-        >
-          <Star className={`w-4 h-4 ${category.isFavorite ? 'fill-[#C47D42]' : ''}`} />
-        </button>
+        {/* Action Buttons Container */}
+        <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5">
+          {/* Edit Details Button */}
+          {onEdit && (
+            <button
+              type="button"
+              onClick={(e) => onEdit(category, e)}
+              className="w-8 h-8 rounded-full flex items-center justify-center bg-black/25 text-white hover:bg-[#8C4E26] hover:text-white backdrop-blur-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100 shadow-xs"
+              title="Edit photo, heading name, color theme & emoji"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+            </button>
+          )}
 
-        {/* Delete Category Button */}
-        <button
-          type="button"
-          onClick={(e) => onDelete(category.id, e)}
-          className="absolute top-3 right-12 z-20 w-8 h-8 rounded-full flex items-center justify-center bg-black/20 text-white/80 hover:bg-red-500 hover:text-white backdrop-blur-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-          title="Delete collection"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
+          {/* Delete Category Button */}
+          <button
+            type="button"
+            onClick={(e) => onDelete(category.id, e)}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-black/25 text-white hover:bg-red-500 hover:text-white backdrop-blur-md transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100 shadow-xs"
+            title="Delete collection"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+
+          {/* Favorite Pin Button */}
+          <button
+            type="button"
+            onClick={(e) => onToggleFavorite(category.id, e)}
+            className={`w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md transition-all ${
+              category.isFavorite
+                ? 'bg-[#FFECC8] text-[#C47D42] shadow-sm'
+                : 'bg-black/25 text-white/80 hover:bg-black/40 hover:text-white'
+            }`}
+            title={category.isFavorite ? 'Remove from favorites' : 'Pin to favorites'}
+          >
+            <Star className={`w-4 h-4 ${category.isFavorite ? 'fill-[#C47D42]' : ''}`} />
+          </button>
+        </div>
 
         {/* Category Cover Emoji Pill if cover image is present */}
-        {category.coverImage && (
+        {category.coverImage && !imageError && (
           <div className="absolute bottom-3 left-3 z-10 w-9 h-9 rounded-xl bg-[#FFFDF9]/90 backdrop-blur-sm border border-[#E6D6C4] flex items-center justify-center text-lg shadow-sm">
             {category.coverEmoji}
           </div>

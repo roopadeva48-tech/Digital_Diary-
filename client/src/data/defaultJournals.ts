@@ -7,7 +7,7 @@ export const INITIAL_JOURNAL_CATEGORIES: JournalCategory[] = [
     description: 'Cherished moments, cozy mornings, and little daily joys.',
     coverColor: '#E6D3BF',
     coverEmoji: '🌸',
-    coverImage: 'https://images.unsplash.com/photo-1540518614846-7ede433c4ef5?w=500&auto=format&fit=crop&q=80',
+    coverImage: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&auto=format&fit=crop&q=80',
     isFavorite: true,
     createdAt: '2026-01-01',
     updatedAt: '2026-01-12',
