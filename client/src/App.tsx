@@ -349,30 +349,19 @@ export default function App() {
   });
 
   const [categories, setCategories] = useState<JournalCategory[]>(() => {
+    const legacyMockIds = new Set(['cat-memories', 'cat-schooldays', 'cat-collegedays', 'cat-travel', 'cat-default-1']);
     try {
       const saved = localStorage.getItem(STORAGE_KEY_CATEGORIES);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map((cat: JournalCategory) => {
-            if (
-              cat.id === 'cat-memories' &&
-              (!cat.coverImage || cat.coverImage.includes('photo-1540518614846-7ede433c4ef5'))
-            ) {
-              return {
-                ...cat,
-                coverImage:
-                  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&auto=format&fit=crop&q=80',
-              };
-            }
-            return cat;
-          });
+        if (Array.isArray(parsed)) {
+          return parsed.filter((cat: JournalCategory) => !legacyMockIds.has(cat.id));
         }
       }
     } catch (e) {
       console.error('Error loading saved categories:', e);
     }
-    return INITIAL_JOURNAL_CATEGORIES;
+    return [];
   });
 
   // Save categories on change

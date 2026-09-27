@@ -22,16 +22,19 @@ const JournalContext = createContext<JournalContextType | undefined>(undefined);
 
 export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [categories, setCategories] = useState<JournalCategory[]>(() => {
+    const legacyMockIds = new Set(['cat-memories', 'cat-schooldays', 'cat-collegedays', 'cat-travel', 'cat-default-1']);
     try {
       const saved = localStorage.getItem(STORAGE_KEY_CATEGORIES);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed.filter((cat: JournalCategory) => !legacyMockIds.has(cat.id));
+        }
       }
     } catch (e) {
       console.error('Error loading initial categories:', e);
     }
-    return INITIAL_JOURNAL_CATEGORIES;
+    return [];
   });
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);

@@ -5,54 +5,7 @@ class DataStore {
   private users: Map<string, User> = new Map();
   private categories: Map<string, JournalCategory> = new Map();
 
-  constructor() {
-    this.seedDefaultData();
-  }
-
-  private seedDefaultData() {
-    const defaultCat: JournalCategory = {
-      id: 'cat-default-1',
-      title: 'Daily Reflections',
-      description: 'Thoughts, morning routines & daily moments',
-      coverColor: 'bg-rose-100',
-      coverEmoji: '✨',
-      isFavorite: true,
-      pages: [
-        {
-          id: 'page-default-1',
-          title: 'A Fresh Morning',
-          month: 'SEP',
-          day: 12,
-          dayOfWeek: 'Saturday',
-          paperTheme: 'kraft',
-          elements: [
-            {
-              id: 'el-1',
-              type: 'text',
-              x: 80,
-              y: 100,
-              width: 320,
-              height: 120,
-              rotation: 0,
-              zIndex: 1,
-              isPinned: false,
-              content: 'Today is a wonderful day to organize my life and thoughts.',
-              fontSize: 18,
-              fontFamily: 'handwriting',
-              color: '#3d342a',
-            },
-          ],
-          isFavorite: false,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    this.categories.set(defaultCat.id, defaultCat);
-  }
+  constructor() {}
 
   // Users
   findUserByEmail(email: string): User | undefined {
