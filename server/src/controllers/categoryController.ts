@@ -5,16 +5,21 @@ import { store } from '../models/store.js';
 export const categoryController = {
   async getAll(req: AuthRequest, res: Response): Promise<void> {
     const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: 'Authentication required.' });
+      return;
+    }
     const categories = store.getCategories(userId);
     res.json({ categories });
   },
 
   async getById(req: AuthRequest, res: Response): Promise<void> {
+    const userId = req.user?.id;
     const { id } = req.params;
     const category = store.getCategoryById(id);
 
-    if (!category) {
-      res.status(404).json({ message: 'Category not found' });
+    if (!category || category.userId !== userId) {
+      res.status(404).json({ message: 'Category not found.' });
       return;
     }
 
@@ -22,6 +27,12 @@ export const categoryController = {
   },
 
   async create(req: AuthRequest, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: 'Authentication required.' });
+      return;
+    }
+
     const { title, description, coverColor, coverEmoji, coverImage, isFavorite } = req.body;
 
     if (!title) {
@@ -30,8 +41,8 @@ export const categoryController = {
     }
 
     const newCategory: JournalCategory = {
-      id: `cat-${Date.now()}`,
-      userId: req.user?.id,
+      id: `cat-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      userId,
       title,
       description: description || '',
       coverColor: coverColor || 'bg-amber-100',
@@ -48,11 +59,12 @@ export const categoryController = {
   },
 
   async update(req: AuthRequest, res: Response): Promise<void> {
+    const userId = req.user?.id;
     const { id } = req.params;
     const existing = store.getCategoryById(id);
 
-    if (!existing) {
-      res.status(404).json({ message: 'Category not found' });
+    if (!existing || existing.userId !== userId) {
+      res.status(404).json({ message: 'Category not found.' });
       return;
     }
 
@@ -60,6 +72,7 @@ export const categoryController = {
       ...existing,
       ...req.body,
       id: existing.id,
+      userId: existing.userId,
       updatedAt: new Date().toISOString(),
     };
 
@@ -68,11 +81,18 @@ export const categoryController = {
   },
 
   async delete(req: AuthRequest, res: Response): Promise<void> {
+    const userId = req.user?.id;
     const { id } = req.params;
-    const deleted = store.deleteCategory(id);
+    const existing = store.getCategoryById(id);
 
+    if (!existing || existing.userId !== userId) {
+      res.status(404).json({ message: 'Category not found.' });
+      return;
+    }
+
+    const deleted = store.deleteCategory(id);
     if (!deleted) {
-      res.status(404).json({ message: 'Category not found' });
+      res.status(404).json({ message: 'Category not found.' });
       return;
     }
 

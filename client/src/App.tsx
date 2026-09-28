@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   BrowserRouter,
   Routes,
@@ -20,10 +20,15 @@ import { AuthForm } from './components/AuthForm';
 import { Dashboard } from './components/Dashboard';
 import { JournalEditor } from './components/JournalEditor';
 import { NotFoundPage } from './components/NotFoundPage';
-import { INITIAL_JOURNAL_CATEGORIES } from './data/defaultJournals';
+import { diaryService } from './services/diaryService';
+import { authService } from './services/authService';
 
-const STORAGE_KEY_CATEGORIES = 'aurapages_categories_v1';
 const STORAGE_KEY_USER = 'aurapages_user_v1';
+
+const getUserStorageKey = (user: UserProfile | null): string | null => {
+  if (!user || !user.email) return null;
+  return `aurapages_categories_${user.email.toLowerCase().trim()}`;
+};
 
 // Scroll to top automatically on route changes
 function ScrollToTop() {
@@ -204,7 +209,9 @@ function AppRoutes({
   };
 
   const handleLogout = () => {
+    authService.logout();
     setUser(null);
+    setCategories([]);
     try {
       localStorage.removeItem(STORAGE_KEY_USER);
     } catch (e) {
@@ -216,12 +223,13 @@ function AppRoutes({
   const handleAddCategory = (
     newCategory: Omit<JournalCategory, 'id' | 'createdAt' | 'updatedAt' | 'pages'>
   ) => {
-    const id = `cat-${Date.now()}`;
+    const id = `cat-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const todayStr = new Date().toISOString().split('T')[0];
 
     const category: JournalCategory = {
       ...newCategory,
       id,
+      userId: user?.id,
       createdAt: todayStr,
       updatedAt: todayStr,
       pages: [
@@ -241,22 +249,27 @@ function AppRoutes({
     };
 
     setCategories([category, ...categories]);
+
+    // Backend sync
+    diaryService.createCategory(newCategory).catch(() => {});
   };
 
   const handleDeleteCategory = (categoryId: string) => {
     setCategories(categories.filter((c) => c.id !== categoryId));
+    diaryService.deleteCategory(categoryId).catch(() => {});
   };
 
   const handleToggleFavorite = (categoryId: string) => {
-    setCategories(
-      categories.map((cat) =>
-        cat.id === categoryId ? { ...cat, isFavorite: !cat.isFavorite } : cat
-      )
-    );
+    const target = categories.find((c) => c.id === categoryId);
+    if (!target) return;
+    const updated = { ...target, isFavorite: !target.isFavorite };
+    setCategories(categories.map((c) => (c.id === categoryId ? updated : c)));
+    diaryService.updateCategory(categoryId, { isFavorite: updated.isFavorite }).catch(() => {});
   };
 
   const handleUpdateCategory = (updated: JournalCategory) => {
     setCategories(categories.map((c) => (c.id === updated.id ? updated : c)));
+    diaryService.updateCategory(updated.id, updated).catch(() => {});
   };
 
   return (
@@ -351,11 +364,16 @@ export default function App() {
   const [categories, setCategories] = useState<JournalCategory[]>(() => {
     const legacyMockIds = new Set(['cat-memories', 'cat-schooldays', 'cat-collegedays', 'cat-travel', 'cat-default-1']);
     try {
-      const saved = localStorage.getItem(STORAGE_KEY_CATEGORIES);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          return parsed.filter((cat: JournalCategory) => !legacyMockIds.has(cat.id));
+      if (user && user.email) {
+        const userKey = getUserStorageKey(user);
+        if (userKey) {
+          const saved = localStorage.getItem(userKey);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed)) {
+              return parsed.filter((cat: JournalCategory) => !legacyMockIds.has(cat.id));
+            }
+          }
         }
       }
     } catch (e) {
@@ -364,14 +382,58 @@ export default function App() {
     return [];
   });
 
-  // Save categories on change
+  // When user changes, load user-specific categories & sync from backend
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(categories));
-    } catch (e) {
-      console.error('Error saving categories:', e);
+    if (!user || !user.email) {
+      setCategories([]);
+      return;
     }
-  }, [categories]);
+
+    const legacyMockIds = new Set(['cat-memories', 'cat-schooldays', 'cat-collegedays', 'cat-travel', 'cat-default-1']);
+    const userKey = getUserStorageKey(user);
+    if (userKey) {
+      try {
+        const saved = localStorage.getItem(userKey);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            setCategories(parsed.filter((cat: JournalCategory) => !legacyMockIds.has(cat.id)));
+          }
+        } else {
+          setCategories([]);
+        }
+      } catch (e) {
+        console.error('Error reading user categories from storage:', e);
+      }
+    }
+
+    // Also fetch user's categories from backend
+    diaryService.getCategories()
+      .then((serverCategories) => {
+        if (Array.isArray(serverCategories)) {
+          const cleanCats = serverCategories.filter((cat) => !legacyMockIds.has(cat.id));
+          setCategories(cleanCats);
+          if (userKey) {
+            localStorage.setItem(userKey, JSON.stringify(cleanCats));
+          }
+        }
+      })
+      .catch(() => {
+        // Fall back to local user storage
+      });
+  }, [user?.email]);
+
+  // Save categories on change scoped to current user
+  useEffect(() => {
+    if (!user || !user.email) return;
+    const userKey = getUserStorageKey(user);
+    if (!userKey) return;
+    try {
+      localStorage.setItem(userKey, JSON.stringify(categories));
+    } catch (e) {
+      console.error('Error saving user categories:', e);
+    }
+  }, [categories, user]);
 
   return (
     <BrowserRouter>

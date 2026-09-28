@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { pageController } from '../controllers/pageController.js';
-import { optionalAuth } from '../middlewares/authMiddleware.js';
+import { requireAuth } from '../middlewares/authMiddleware.js';
 
 const router = Router();
 
-router.post('/:categoryId/pages', optionalAuth, pageController.savePage);
-router.delete('/:categoryId/pages/:pageId', optionalAuth, pageController.deletePage);
+router.post('/:categoryId/pages', requireAuth, pageController.savePage);
+router.delete('/:categoryId/pages/:pageId', requireAuth, pageController.deletePage);
 
 export default router;

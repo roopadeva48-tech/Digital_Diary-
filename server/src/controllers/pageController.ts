@@ -4,11 +4,23 @@ import { store } from '../models/store.js';
 
 export const pageController = {
   async savePage(req: AuthRequest, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: 'Authentication required.' });
+      return;
+    }
+
     const { categoryId } = req.params;
     const pageData: JournalPage = req.body;
 
     if (!pageData.id || !pageData.title) {
       res.status(400).json({ message: 'Page id and title are required.' });
+      return;
+    }
+
+    const category = store.getCategoryById(categoryId);
+    if (!category || category.userId !== userId) {
+      res.status(404).json({ message: 'Category not found.' });
       return;
     }
 
@@ -18,7 +30,7 @@ export const pageController = {
     });
 
     if (!saved) {
-      res.status(404).json({ message: 'Category not found' });
+      res.status(404).json({ message: 'Category not found.' });
       return;
     }
 
@@ -26,11 +38,22 @@ export const pageController = {
   },
 
   async deletePage(req: AuthRequest, res: Response): Promise<void> {
-    const { categoryId, pageId } = req.params;
-    const success = store.deletePage(categoryId, pageId);
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: 'Authentication required.' });
+      return;
+    }
 
+    const { categoryId, pageId } = req.params;
+    const category = store.getCategoryById(categoryId);
+    if (!category || category.userId !== userId) {
+      res.status(404).json({ message: 'Category not found.' });
+      return;
+    }
+
+    const success = store.deletePage(categoryId, pageId);
     if (!success) {
-      res.status(404).json({ message: 'Category or page not found' });
+      res.status(404).json({ message: 'Category or page not found.' });
       return;
     }
 

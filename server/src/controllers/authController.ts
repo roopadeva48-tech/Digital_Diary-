@@ -32,7 +32,7 @@ export const authController = {
     const token = generateToken({ id: newUser.id, email: newUser.email, name: newUser.name });
     res.status(201).json({
       token,
-      user: { name: newUser.name, email: newUser.email, avatar: newUser.avatar },
+      user: { id: newUser.id, name: newUser.name, email: newUser.email, avatar: newUser.avatar },
     });
   },
 
@@ -66,7 +66,7 @@ export const authController = {
     const token = generateToken({ id: user.id, email: user.email, name: user.name });
     res.status(200).json({
       token,
-      user: { name: user.name, email: user.email, avatar: user.avatar },
+      user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar },
     });
   },
 
@@ -83,7 +83,7 @@ export const authController = {
     }
 
     res.json({
-      user: { name: user.name, email: user.email, avatar: user.avatar },
+      user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar },
     });
   },
 };

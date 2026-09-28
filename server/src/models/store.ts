@@ -23,9 +23,8 @@ class DataStore {
 
   // Categories
   getCategories(userId?: string): JournalCategory[] {
-    const all = Array.from(this.categories.values());
-    if (!userId) return all;
-    return all.filter((c) => !c.userId || c.userId === userId);
+    if (!userId) return [];
+    return Array.from(this.categories.values()).filter((c) => c.userId === userId);
   }
 
   getCategoryById(id: string): JournalCategory | undefined {

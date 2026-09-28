@@ -51,6 +51,7 @@ export interface JournalPage {
 
 export interface JournalCategory {
   id: string;
+  userId?: string;
   title: string;
   description: string;
   coverColor: string;
@@ -63,6 +64,7 @@ export interface JournalCategory {
 }
 
 export interface UserProfile {
+  id?: string;
   name: string;
   email: string;
   avatar?: string;
