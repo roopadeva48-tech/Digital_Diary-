@@ -459,6 +459,10 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
                   alt={element.title || 'Journal photo'}
                   className="w-full h-full object-cover pointer-events-none"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=500&auto=format&fit=crop&q=80';
+                  }}
                 />
               </div>
 
@@ -475,6 +479,10 @@ export const CanvasElementRenderer: React.FC<CanvasElementRendererProps> = ({
                 alt="Journal photo"
                 className="w-full h-full object-cover pointer-events-none"
                 referrerPolicy="no-referrer"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src =
+                    'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=500&auto=format&fit=crop&q=80';
+                }}
               />
             </div>
           )}

@@ -161,7 +161,7 @@ export const SAMPLE_SCRAPBOOK_PHOTOS = [
     id: 'photo-bed',
     title: 'Cozy Morning Bed',
     caption: 'simplicity is the ultimate sophistication',
-    url: 'https://images.unsplash.com/photo-1540518614846-7ede433c4ef5?w=500&auto=format&fit=crop&q=80',
+    url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=500&auto=format&fit=crop&q=80',
     tags: ['lifestyle', 'cozy']
   },
   {

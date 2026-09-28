@@ -291,6 +291,10 @@ export const StickerLibrary: React.FC<StickerLibraryProps> = ({ onAddElement, on
                     alt={photo.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=500&auto=format&fit=crop&q=80';
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-2">
                     <span className="text-[11px] text-white font-handwriting truncate">

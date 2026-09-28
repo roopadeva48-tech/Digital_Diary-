@@ -349,6 +349,11 @@ export const SidebarToolbar: React.FC<SidebarToolbarProps> = ({
                           src={preset.url}
                           alt={preset.title}
                           className="w-full h-full object-cover group-hover:scale-108 transition duration-300"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=500&auto=format&fit=crop&q=80';
+                          }}
                         />
                       </div>
                       <div className="p-1 text-center font-handwriting text-xs text-[#4A3423] truncate">
