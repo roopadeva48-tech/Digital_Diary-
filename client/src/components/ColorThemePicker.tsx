@@ -81,7 +81,7 @@ export const ColorThemePicker: React.FC<ColorThemePickerProps> = ({
   onChangePattern,
   activePattern = 'solid',
   onClose,
-  onThisPageColors = ['#5C3D2E', '#FFFFFF', '#FFF9E2', '#681313', '#000000', '#ECEAE4'],
+  onThisPageColors = [],
 }) => {
   // Tabs: 'Custom' or 'Libraries'
   const [activeTab, setActiveTab] = useState<'custom' | 'libraries'>('custom');
@@ -106,19 +106,22 @@ export const ColorThemePicker: React.FC<ColorThemePickerProps> = ({
     color.startsWith('#') ? color.replace('#', '').toUpperCase() : 'FFF9E2'
   );
 
-  // Palette source dropdown state (Image 4: "On this page")
+  // Palette source dropdown state ("On this page")
   const [paletteSource, setPaletteSource] = useState<string>('On this page');
   const [paletteDropdownOpen, setPaletteDropdownOpen] = useState<boolean>(false);
 
-  // Custom user swatches
-  const [savedSwatches, setSavedSwatches] = useState<string[]>([
-    '#5C3D2E',
-    '#FFFFFF',
-    '#FFF9E2',
-    '#681313',
-    '#000000',
-    '#ECEAE4',
-  ]);
+  // Custom colors dynamically used/added by user
+  const [userUsedColors, setUserUsedColors] = useState<string[]>([]);
+
+  // Record a color used by user
+  const recordUsedColor = useCallback((hex: string) => {
+    if (!hex || !hex.startsWith('#')) return;
+    const upper = hex.toUpperCase();
+    setUserUsedColors((prev) => {
+      if (prev.includes(upper)) return prev;
+      return [upper, ...prev];
+    });
+  }, []);
 
   // Gradient Stops State (Image 2)
   const [gradientType, setGradientType] = useState<'Linear' | 'Radial'>('Linear');
@@ -258,6 +261,7 @@ export const ColorThemePicker: React.FC<ColorThemePickerProps> = ({
 
   const handleSatValPointerUp = (e: React.PointerEvent) => {
     isDraggingSatVal.current = false;
+    recordUsedColor(currentHex);
     try {
       (e.target as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {
@@ -308,6 +312,7 @@ export const ColorThemePicker: React.FC<ColorThemePickerProps> = ({
 
   const handleHuePointerUp = (e: React.PointerEvent) => {
     isDraggingHue.current = false;
+    recordUsedColor(currentHex);
     try {
       (e.target as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {
@@ -374,6 +379,7 @@ export const ColorThemePicker: React.FC<ColorThemePickerProps> = ({
           setHsv(nextHsv);
           setHexInput(pickedHex.replace('#', ''));
           onChangeColor(pickedHex);
+          recordUsedColor(pickedHex);
         }
       } catch {
         // canceled
@@ -383,6 +389,7 @@ export const ColorThemePicker: React.FC<ColorThemePickerProps> = ({
       setHsv(hexToHsv(fallbackColor));
       setHexInput('8C4E26');
       onChangeColor(fallbackColor);
+      recordUsedColor(fallbackColor);
     }
   };
 
@@ -391,9 +398,10 @@ export const ColorThemePicker: React.FC<ColorThemePickerProps> = ({
     const val = e.target.value.replace(/[^0-9A-Fa-f]/g, '').slice(0, 6);
     setHexInput(val.toUpperCase());
     if (val.length === 6 || val.length === 3) {
-      const fullHex = `#${val}`;
+      const fullHex = `#${val}`.toUpperCase();
       const nextHsv = hexToHsv(fullHex);
       setHsv(nextHsv);
+      recordUsedColor(fullHex);
       if (fillMode === 'gradient') {
         const updated = stops.map((s) =>
           s.id === activeStopId ? { ...s, color: fullHex } : s
@@ -418,11 +426,9 @@ export const ColorThemePicker: React.FC<ColorThemePickerProps> = ({
     }
   };
 
-  // Add current color to swatches
+  // Add current color to user's swatches
   const handleAddCurrentToSwatches = () => {
-    if (!savedSwatches.includes(currentHex)) {
-      setSavedSwatches([currentHex, ...savedSwatches]);
-    }
+    recordUsedColor(currentHex);
   };
 
   // Select a preset swatch
@@ -430,6 +436,7 @@ export const ColorThemePicker: React.FC<ColorThemePickerProps> = ({
     const nextHsv = hexToHsv(swatchHex);
     setHsv(nextHsv);
     setHexInput(swatchHex.replace('#', '').toUpperCase());
+    recordUsedColor(swatchHex);
     if (fillMode === 'gradient') {
       const updated = stops.map((s) =>
         s.id === activeStopId ? { ...s, color: swatchHex } : s
@@ -444,11 +451,17 @@ export const ColorThemePicker: React.FC<ColorThemePickerProps> = ({
   // Active swatches list according to dropdown
   const getActiveSwatches = () => {
     if (paletteSource === 'On this page') {
-      const merged = Array.from(new Set([...onThisPageColors, ...savedSwatches]));
-      return merged.slice(0, 8);
+      const combined = new Set<string>();
+      onThisPageColors.forEach((c) => {
+        if (c && c.startsWith('#')) combined.add(c.toUpperCase());
+      });
+      userUsedColors.forEach((c) => {
+        if (c && c.startsWith('#')) combined.add(c.toUpperCase());
+      });
+      return Array.from(combined);
     }
     const foundLib = COLOR_LIBRARIES.find((lib) => lib.name === paletteSource);
-    return foundLib ? foundLib.colors : savedSwatches;
+    return foundLib ? foundLib.colors : userUsedColors;
   };
 
   return (
@@ -1178,25 +1191,31 @@ export const ColorThemePicker: React.FC<ColorThemePickerProps> = ({
               )}
             </div>
 
-            {/* Swatch chips row (Exact match to Image 4: Row of rounded squares) */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-              {getActiveSwatches().map((swatch, idx) => {
-                const isSelected = currentHex.toLowerCase() === swatch.toLowerCase();
-                return (
-                  <button
-                    key={`${swatch}-${idx}`}
-                    type="button"
-                    onClick={() => handleSelectSwatch(swatch)}
-                    style={{ backgroundColor: swatch }}
-                    className={`w-7 h-7 rounded-lg shrink-0 border border-black/15 shadow-2xs transition transform hover:scale-110 active:scale-95 cursor-pointer ${
-                      isSelected
-                        ? 'ring-2 ring-[#8C4E26] ring-offset-2 scale-105'
-                        : ''
-                    }`}
-                    title={swatch}
-                  />
-                );
-              })}
+            {/* Swatch chips row (Dynamic row of rounded squares) */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar min-h-[32px]">
+              {getActiveSwatches().length > 0 ? (
+                getActiveSwatches().map((swatch, idx) => {
+                  const isSelected = currentHex.toLowerCase() === swatch.toLowerCase();
+                  return (
+                    <button
+                      key={`${swatch}-${idx}`}
+                      type="button"
+                      onClick={() => handleSelectSwatch(swatch)}
+                      style={{ backgroundColor: swatch }}
+                      className={`w-7 h-7 rounded-lg shrink-0 border border-black/15 shadow-2xs transition transform hover:scale-110 active:scale-95 cursor-pointer ${
+                        isSelected
+                          ? 'ring-2 ring-[#8C4E26] ring-offset-2 scale-105'
+                          : ''
+                      }`}
+                      title={swatch}
+                    />
+                  );
+                })
+              ) : (
+                <div className="text-[11px] text-[#A89078] italic py-1 px-1">
+                  No colors used on this page yet
+                </div>
+              )}
             </div>
           </div>
         </>

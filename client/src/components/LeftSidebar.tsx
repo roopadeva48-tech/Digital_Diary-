@@ -145,22 +145,19 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
     showFeedback('Placed highlighter strip ✨');
   };
 
-  // Collect colors currently present on the active page (Image 4)
+  // Collect colors currently present on the active page
   const getPageColors = (): string[] => {
     const colors = new Set<string>();
     if (currentPage.customBackgroundColor && currentPage.customBackgroundColor.startsWith('#')) {
-      colors.add(currentPage.customBackgroundColor);
+      colors.add(currentPage.customBackgroundColor.toUpperCase());
     }
     // Collect all element colors on this particular page
     currentPage.elements.forEach((el) => {
-      if (el.color && el.color.startsWith('#')) colors.add(el.color);
-      if (el.backgroundColor && el.backgroundColor.startsWith('#')) colors.add(el.backgroundColor);
-      if (el.highlightColor && el.highlightColor.startsWith('#')) colors.add(el.highlightColor);
+      if (el.color && el.color.startsWith('#')) colors.add(el.color.toUpperCase());
+      if (el.backgroundColor && el.backgroundColor.startsWith('#')) colors.add(el.backgroundColor.toUpperCase());
+      if (el.highlightColor && el.highlightColor.startsWith('#')) colors.add(el.highlightColor.toUpperCase());
     });
-    // Add default page colors matching Image 4
-    const defaultPalette = ['#5C3D2E', '#FFFFFF', '#FFF9E2', '#681313', '#000000', '#ECEAE4'];
-    defaultPalette.forEach((c) => colors.add(c));
-    return Array.from(colors).slice(0, 8);
+    return Array.from(colors);
   };
 
   return (
