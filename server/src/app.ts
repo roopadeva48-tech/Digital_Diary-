@@ -1,8 +1,15 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { config } from './config/env.js';
 import apiRouter from './routes/index.js';
 import { errorHandler } from './middlewares/errorHandler.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const clientDistPath = path.resolve(__dirname, '../../client/dist');
 
 const app = express();
 
@@ -29,7 +36,19 @@ app.use('/api/v1', apiRouter);
 // Fallback route alias
 app.use('/api', apiRouter);
 
+// Serve static React client build if built
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
+
 // Error handling middleware
 app.use(errorHandler);
 
 export default app;
+
